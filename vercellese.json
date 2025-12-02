@@ -1,0 +1,18 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "api/expenses.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/expenses",
+      "dest": "/api/expenses.js",
+      "methods": ["GET", "POST"]
+    }
+    // Vercel handles GET/POST to /api/expenses automatically mapping to 
+    // the file api/expenses.js, but explicit routing is robust.
+  ]
+}
