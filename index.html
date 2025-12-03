@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expense Tracker</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 20px;
+            background-color: #f4f4f9;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        form {
+            display: grid;
+            gap: 10px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #ccc;
+            margin-bottom: 20px;
+        }
+        input[type="text"], input[type="number"] {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        button {
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #expenses-list {
+            list-style: none;
+            padding: 0;
+        }
+        #expenses-list li {
+            background-color: #e9ecef;
+            padding: 10px;
+            margin-bottom: 8px;
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .expense-amount {
+            font-weight: bold;
+            color: #28a745;
+        }
+        .error-message {
+            color: red;
+            font-weight: bold;
+            text-align: center;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Expense Tracker 💸</h1>
+        
+        <form id="expense-form">
+            <h2>Add New Expense</h2>
+            <input type="text" id="description" placeholder="Description (e.g., Coffee, Rent)" required>
+            <input type="number" id="amount" placeholder="Amount (e.g., 5.50)" step="0.01" required>
+            <button type="submit">Add Expense</button>
+        </form>
+
+        <p id="error-message" class="error-message" style="display: none;"></p>
+
+        <h2>Expense History</h2>
+        <ul id="expenses-list">
+            </ul>
+    </div>
+
+    <script>
+        const API_ENDPOINT = '/api/expenses'; // Your Vercel API endpoint
+        const expenseForm = document.getElementById('expense-form');
+        const expensesList = document.getElementById('expenses-list');
+        const errorMessage = document.getElementById('error-message');
+
+        /**
+         * Renders the list of expenses in the DOM.
+         * @param {Array<Object>} expenses - The array of expense objects.
+         */
+        function renderExpenses(expenses) {
+            expensesList.innerHTML = ''; // Clear existing list
+            
+            if (expenses && expenses.length > 0) {
+                expenses.forEach(expense => {
+                    const listItem = document.createElement('li');
+                    // Format amount to 2 decimal places
+                    const formattedAmount = parseFloat(expense.amount).toFixed(2);
+                    
+                    listItem.innerHTML = `
+                        <span>${expense.description}</span>
+                        <span class="expense-amount">$${formattedAmount}</span>
+                    `;
+                    expensesList.appendChild(listItem);
+                });
+            } else {
+                expensesList.innerHTML = '<li>No expenses recorded yet.</li>';
+            }
+        }
+
+        /**
+         * Fetches all expenses from the API and updates the list. (GET Request)
+         */
+        async function loadExpenses() {
+            try {
+                const response = await fetch(API_ENDPOINT);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                // Assuming the API returns an array of expenses directly
+                renderExpenses(data);
+                displayError(''); // Clear any previous error
+            } catch (error) {
+                console.error('Error loading expenses:', error);
+                renderExpenses([]); // Clear list on error
+                displayError('Failed to load expenses. Please check your API.');
+            }
+        }
+
+        /**
+         * Handles the form submission to add a new expense. (POST Request)
+         * @param {Event} e - The form submission event.
+         */
+        async function handleFormSubmit(e) {
+            e.preventDefault();
+
+            const descriptionInput = document.getElementById('description');
+            const amountInput = document.getElementById('amount');
+
+            const newExpense = {
+                description: descriptionInput.value,
+                // Ensure amount is a number for the API, even if sent as a string
+                amount: parseFloat(amountInput.value)
+            };
+
+            if (isNaN(newExpense.amount) || newExpense.amount <= 0) {
+                displayError('Please enter a valid amount.');
+                return;
+            }
+
+            try {
+                const response = await fetch(API_ENDPOINT, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(newExpense)
+                });
+
+                if (response.ok) {
+                    // Success! Clear the form and reload the list to show the new expense
+                    descriptionInput.value = '';
+                    amountInput.value = '';
+                    displayError(''); // Clear any previous error
+                    await loadExpenses();
+                } else {
+                    // The API returned an error status (e.g., 400, 500)
+                    const errorData = await response.json();
+                    const message = errorData.message || `Failed to add expense. Status: ${response.status}`;
+                    displayError(message);
+                }
+            } catch (error) {
+                console.error('Error submitting expense:', error);
+                displayError('A network error occurred. Could not connect to the API.');
+            }
+        }
+
+        /**
+         * Displays or hides the error message area.
+         * @param {string} message - The error message to display.
+         */
+        function displayError(message) {
+            if (message) {
+                errorMessage.textContent = message;
+                errorMessage.style.display = 'block';
+            } else {
+                errorMessage.textContent = '';
+                errorMessage.style.display = 'none';
+            }
+        }
+
+        // --- Event Listeners and Initialization ---
+
+        // 1. Attach the submit handler to the form
+        expenseForm.addEventListener('submit', handleFormSubmit);
+
+        // 2. Load and display expenses when the page is fully loaded
+        document.addEventListener('DOMContentLoaded', loadExpenses);
+
+    </script>
+</body>
+</html>
