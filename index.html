@@ -88,11 +88,18 @@
 
         <h2>Expense History</h2>
         <ul id="expenses-list">
-            </ul>
+        </ul>
     </div>
 
     <script>
-        const API_ENDPOINT = '/api/expenses'; // Your Vercel API endpoint
+        // --- MOCK DATA ARRAY ---
+        // This array simulates the data that would be returned by your API.
+        let expenses = [
+            { description: 'Groceries', amount: 45.75 },
+            { description: 'Dinner Out', amount: 62.00 },
+            { description: 'Monthly Rent', amount: 1200.00 }
+        ];
+
         const expenseForm = document.getElementById('expense-form');
         const expensesList = document.getElementById('expenses-list');
         const errorMessage = document.getElementById('error-message');
@@ -101,11 +108,11 @@
          * Renders the list of expenses in the DOM.
          * @param {Array<Object>} expenses - The array of expense objects.
          */
-        function renderExpenses(expenses) {
+        function renderExpenses(expensesToRender) {
             expensesList.innerHTML = ''; // Clear existing list
             
-            if (expenses && expenses.length > 0) {
-                expenses.forEach(expense => {
+            if (expensesToRender && expensesToRender.length > 0) {
+                expensesToRender.forEach(expense => {
                     const listItem = document.createElement('li');
                     // Format amount to 2 decimal places
                     const formattedAmount = parseFloat(expense.amount).toFixed(2);
@@ -122,29 +129,26 @@
         }
 
         /**
-         * Fetches all expenses from the API and updates the list. (GET Request)
+         * Fetches all expenses (using mock data) and updates the list. (Simulated GET)
          */
         async function loadExpenses() {
             try {
-                const response = await fetch(API_ENDPOINT);
+                // SIMULATE API CALL SUCCESS with mock data
+                await new Promise(resolve => setTimeout(resolve, 300)); // Small delay for effect
                 
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                
-                const data = await response.json();
                 // Assuming the API returns an array of expenses directly
-                renderExpenses(data);
+                renderExpenses(expenses);
                 displayError(''); // Clear any previous error
             } catch (error) {
                 console.error('Error loading expenses:', error);
-                renderExpenses([]); // Clear list on error
-                displayError('Failed to load expenses. Please check your API.');
+                // This block would normally handle the failed fetch request
+                renderExpenses([]); 
+                displayError('Failed to load expenses. Using mock data, so this shouldn\'t happen!');
             }
         }
 
         /**
-         * Handles the form submission to add a new expense. (POST Request)
+         * Handles the form submission to add a new expense. (Simulated POST)
          * @param {Event} e - The form submission event.
          */
         async function handleFormSubmit(e) {
@@ -154,40 +158,32 @@
             const amountInput = document.getElementById('amount');
 
             const newExpense = {
-                description: descriptionInput.value,
-                // Ensure amount is a number for the API, even if sent as a string
+                description: descriptionInput.value.trim(),
                 amount: parseFloat(amountInput.value)
             };
 
-            if (isNaN(newExpense.amount) || newExpense.amount <= 0) {
-                displayError('Please enter a valid amount.');
+            if (newExpense.description === '' || isNaN(newExpense.amount) || newExpense.amount <= 0) {
+                displayError('Please enter a valid description and a positive amount.');
                 return;
             }
 
             try {
-                const response = await fetch(API_ENDPOINT, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(newExpense)
-                });
+                // SIMULATE API POST CALL SUCCESS
+                await new Promise(resolve => setTimeout(resolve, 500)); // Simulate network latency
 
-                if (response.ok) {
-                    // Success! Clear the form and reload the list to show the new expense
-                    descriptionInput.value = '';
-                    amountInput.value = '';
-                    displayError(''); // Clear any previous error
-                    await loadExpenses();
-                } else {
-                    // The API returned an error status (e.g., 400, 500)
-                    const errorData = await response.json();
-                    const message = errorData.message || `Failed to add expense. Status: ${response.status}`;
-                    displayError(message);
-                }
+                // Add the new expense to our local array
+                expenses.push(newExpense); 
+                
+                // Success! Clear the form and reload the list to show the new expense
+                descriptionInput.value = '';
+                amountInput.value = '';
+                displayError(''); // Clear any previous error
+                await loadExpenses();
+                
             } catch (error) {
                 console.error('Error submitting expense:', error);
-                displayError('A network error occurred. Could not connect to the API.');
+                // This block would normally handle the failed fetch request
+                displayError('A simulated network error occurred. Could not add expense.');
             }
         }
 
