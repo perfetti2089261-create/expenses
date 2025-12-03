@@ -5,71 +5,105 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Expense Tracker</title>
     <style>
+        /* New: Soft Teal background for the entire page */
         body {
-            font-family: sans-serif;
-            margin: 20px;
-            background-color: #f4f4f9;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            /* New Background Color */
+            background-color: #e0f7fa; /* Soft Teal/Cyan */
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
         }
+        /* Enhanced container design (the main card) */
         .container {
             max-width: 600px;
-            margin: 0 auto;
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            margin-top: 50px; /* Space from the top */
+            background-color: #ffffff; /* Pure White Card */
+            padding: 30px;
+            border-radius: 12px; /* Smoother corners */
+            /* More pronounced, softer shadow */
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15); 
         }
         h1 {
-            color: #333;
+            color: #00796b; /* Darker Teal for Heading */
             text-align: center;
+            margin-bottom: 25px;
+        }
+        h2 {
+            color: #333;
+            border-bottom: 2px solid #b2dfdb; /* Light Teal underline */
+            padding-bottom: 8px;
+            margin-top: 0;
         }
         form {
             display: grid;
-            gap: 10px;
-            padding-bottom: 20px;
+            gap: 15px; /* Increased gap */
+            padding-bottom: 25px;
             border-bottom: 1px solid #ccc;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
         }
         input[type="text"], input[type="number"] {
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
+            padding: 12px;
+            border: 1px solid #b2dfdb; /* Light Teal Border */
+            border-radius: 6px;
             width: 100%;
             box-sizing: border-box;
+            transition: border-color 0.3s;
         }
+        input[type="text"]:focus, input[type="number"]:focus {
+            border-color: #00796b; /* Dark Teal on focus */
+            outline: none;
+        }
+        /* Updated button color scheme */
         button {
-            padding: 10px 15px;
-            background-color: #007bff;
+            padding: 12px 15px;
+            background-color: #00bcd4; /* Bright Blue/Cyan */
             color: white;
             border: none;
-            border-radius: 4px;
+            border-radius: 6px;
             cursor: pointer;
-            transition: background-color 0.3s;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+            transition: background-color 0.3s, transform 0.1s;
         }
         button:hover {
-            background-color: #0056b3;
+            background-color: #0097a7; /* Darker shade on hover */
+            transform: translateY(-1px);
         }
         #expenses-list {
             list-style: none;
             padding: 0;
         }
+        /* Enhanced list item design */
         #expenses-list li {
-            background-color: #e9ecef;
-            padding: 10px;
-            margin-bottom: 8px;
-            border-radius: 4px;
+            background-color: #f5f5f5; /* Lighter grey for contrast */
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            border-left: 5px solid #00bcd4; /* Accent color bar */
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
         }
         .expense-amount {
-            font-weight: bold;
-            color: #28a745;
+            font-weight: 700; /* Bolder */
+            color: #4caf50; /* Standard Success Green */
+            font-size: 1.1em;
         }
         .error-message {
-            color: red;
+            color: #d32f2f; /* Dark Red */
             font-weight: bold;
             text-align: center;
-            margin-top: 10px;
+            margin-top: 15px;
+            padding: 10px;
+            background-color: #ffebee;
+            border: 1px solid #d32f2f;
+            border-radius: 4px;
         }
     </style>
 </head>
@@ -93,7 +127,6 @@
 
     <script>
         // --- MOCK DATA ARRAY ---
-        // This array simulates the data that would be returned by your API.
         let expenses = [
             { description: 'Groceries', amount: 45.75 },
             { description: 'Dinner Out', amount: 62.00 },
@@ -106,7 +139,6 @@
 
         /**
          * Renders the list of expenses in the DOM.
-         * @param {Array<Object>} expenses - The array of expense objects.
          */
         function renderExpenses(expensesToRender) {
             expensesList.innerHTML = ''; // Clear existing list
@@ -136,12 +168,10 @@
                 // SIMULATE API CALL SUCCESS with mock data
                 await new Promise(resolve => setTimeout(resolve, 300)); // Small delay for effect
                 
-                // Assuming the API returns an array of expenses directly
                 renderExpenses(expenses);
                 displayError(''); // Clear any previous error
             } catch (error) {
                 console.error('Error loading expenses:', error);
-                // This block would normally handle the failed fetch request
                 renderExpenses([]); 
                 displayError('Failed to load expenses. Using mock data, so this shouldn\'t happen!');
             }
@@ -149,7 +179,6 @@
 
         /**
          * Handles the form submission to add a new expense. (Simulated POST)
-         * @param {Event} e - The form submission event.
          */
         async function handleFormSubmit(e) {
             e.preventDefault();
@@ -182,14 +211,12 @@
                 
             } catch (error) {
                 console.error('Error submitting expense:', error);
-                // This block would normally handle the failed fetch request
                 displayError('A simulated network error occurred. Could not add expense.');
             }
         }
 
         /**
          * Displays or hides the error message area.
-         * @param {string} message - The error message to display.
          */
         function displayError(message) {
             if (message) {
