@@ -46,7 +46,7 @@
             border-bottom: 1px solid #ccc;
             margin-bottom: 25px;
         }
-        input[type="text"], input[type="number"] {
+        input[type="text"], input[type="number"], input[type="date"] { /* Added input[type="date"] */
             padding: 12px;
             border: 1px solid #b2dfdb; /* Light Teal Border */
             border-radius: 6px;
@@ -54,7 +54,7 @@
             box-sizing: border-box;
             transition: border-color 0.3s;
         }
-        input[type="text"]:focus, input[type="number"]:focus {
+        input[type="text"]:focus, input[type="number"]:focus, input[type="date"]:focus { /* Added input[type="date"] */
             border-color: #00796b; /* Dark Teal on focus */
             outline: none;
         }
@@ -90,6 +90,16 @@
             border-left: 5px solid #00bcd4; /* Accent color bar */
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
         }
+        /* Style for the date and description container */
+        .expense-details {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .expense-date {
+            font-size: 0.85em;
+            color: #6c757d; /* Grey color for date */
+        }
         .expense-amount {
             font-weight: 700; /* Bolder */
             color: #4caf50; /* Standard Success Green */
@@ -113,6 +123,7 @@
         
         <form id="expense-form">
             <h2>Add New Expense</h2>
+            <input type="date" id="date" required>
             <input type="text" id="description" placeholder="Description (e.g., Coffee, Rent)" required>
             <input type="number" id="amount" placeholder="Amount (e.g., 5.50)" step="0.01" required>
             <button type="submit">Add Expense</button>
@@ -128,14 +139,22 @@
     <script>
         // --- MOCK DATA ARRAY ---
         let expenses = [
-            { description: 'Groceries', amount: 45.75 },
-            { description: 'Dinner Out', amount: 62.00 },
-            { description: 'Monthly Rent', amount: 1200.00 }
+            // Updated mock data with a date for each entry
+            { description: 'Groceries', amount: 45.75, date: '2025-12-01' },
+            { description: 'Dinner Out', amount: 62.00, date: '2025-11-28' },
+            { description: 'Monthly Rent', amount: 1200.00, date: '2025-12-03' }
         ];
 
         const expenseForm = document.getElementById('expense-form');
         const expensesList = document.getElementById('expenses-list');
         const errorMessage = document.getElementById('error-message');
+        
+        // New: Get the date input element
+        const dateInput = document.getElementById('date');
+
+        // Set default date to today for convenience
+        dateInput.valueAsDate = new Date();
+
 
         /**
          * Renders the list of expenses in the DOM.
@@ -144,13 +163,23 @@
             expensesList.innerHTML = ''; // Clear existing list
             
             if (expensesToRender && expensesToRender.length > 0) {
-                expensesToRender.forEach(expense => {
+                // Sort expenses by date descending (newest first)
+                const sortedExpenses = expensesToRender.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+                sortedExpenses.forEach(expense => {
                     const listItem = document.createElement('li');
                     // Format amount to 2 decimal places
                     const formattedAmount = parseFloat(expense.amount).toFixed(2);
                     
+                    // Format date for display (e.g., YYYY-MM-DD to Dec 03, 2025)
+                    const dateObj = new Date(expense.date);
+                    const formattedDate = dateObj.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+
                     listItem.innerHTML = `
-                        <span>${expense.description}</span>
+                        <div class="expense-details">
+                            <span>${expense.description}</span>
+                            <span class="expense-date">${formattedDate}</span>
+                        </div>
                         <span class="expense-amount">$${formattedAmount}</span>
                     `;
                     expensesList.appendChild(listItem);
@@ -186,13 +215,17 @@
             const descriptionInput = document.getElementById('description');
             const amountInput = document.getElementById('amount');
 
+            // New: Get date value
+            const dateValue = dateInput.value;
+
             const newExpense = {
+                date: dateValue, // Include the date
                 description: descriptionInput.value.trim(),
                 amount: parseFloat(amountInput.value)
             };
 
-            if (newExpense.description === '' || isNaN(newExpense.amount) || newExpense.amount <= 0) {
-                displayError('Please enter a valid description and a positive amount.');
+            if (newExpense.description === '' || isNaN(newExpense.amount) || newExpense.amount <= 0 || newExpense.date === '') {
+                displayError('Please enter a valid date, description, and a positive amount.');
                 return;
             }
 
@@ -206,6 +239,7 @@
                 // Success! Clear the form and reload the list to show the new expense
                 descriptionInput.value = '';
                 amountInput.value = '';
+                dateInput.valueAsDate = new Date(); // Reset date to today
                 displayError(''); // Clear any previous error
                 await loadExpenses();
                 
@@ -239,3 +273,5 @@
     </script>
 </body>
 </html>
+
+
