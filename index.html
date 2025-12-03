@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Expense Tracker</title>
+    <title>My Expenses</title>
     <style>
-        /* New: Soft Teal background for the entire page */
+        /* NEW: Light Purple Theme */
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: Arial, Helvetica, sans-serif; /* New Font */
             margin: 0;
             padding: 20px;
-            /* New Background Color */
-            background-color: #e0f7fa; /* Soft Teal/Cyan */
+            /* NEW Background Color: Light Purple */
+            background-color: #f3e5f5; /* Light Lavender/Purple */
             display: flex;
             justify-content: center;
             align-items: flex-start;
@@ -21,47 +21,49 @@
         .container {
             max-width: 600px;
             width: 100%;
-            margin-top: 50px; /* Space from the top */
-            background-color: #ffffff; /* Pure White Card */
+            margin-top: 50px; 
+            background-color: #ffffff;
             padding: 30px;
-            border-radius: 12px; /* Smoother corners */
-            /* More pronounced, softer shadow */
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15); 
+            border-radius: 12px;
+            /* New, softer purple shadow */
+            box-shadow: 0 10px 25px rgba(103, 58, 183, 0.2); 
         }
         h1 {
-            color: #00796b; /* Darker Teal for Heading */
+            color: #4527a0; /* Deep Purple for Heading */
             text-align: center;
             margin-bottom: 25px;
         }
         h2 {
             color: #333;
-            border-bottom: 2px solid #b2dfdb; /* Light Teal underline */
+            border-bottom: 2px solid #ce93d8; /* Light Purple underline */
             padding-bottom: 8px;
             margin-top: 0;
         }
         form {
             display: grid;
-            gap: 15px; /* Increased gap */
+            gap: 15px;
             padding-bottom: 25px;
             border-bottom: 1px solid #ccc;
             margin-bottom: 25px;
         }
-        input[type="text"], input[type="number"], input[type="date"] { /* Added input[type="date"] */
+        /* Added select element to the input styling */
+        input[type="text"], input[type="number"], input[type="date"], select { 
             padding: 12px;
-            border: 1px solid #b2dfdb; /* Light Teal Border */
+            border: 1px solid #ce93d8; /* Light Purple Border */
             border-radius: 6px;
             width: 100%;
             box-sizing: border-box;
             transition: border-color 0.3s;
+            background-color: white; /* Ensure select background is white */
         }
-        input[type="text"]:focus, input[type="number"]:focus, input[type="date"]:focus { /* Added input[type="date"] */
-            border-color: #00796b; /* Dark Teal on focus */
+        input[type="text"]:focus, input[type="number"]:focus, input[type="date"]:focus, select:focus {
+            border-color: #673ab7; /* Medium Purple on focus */
             outline: none;
         }
-        /* Updated button color scheme */
+        /* Updated button color scheme to Purple */
         button {
             padding: 12px 15px;
-            background-color: #00bcd4; /* Bright Blue/Cyan */
+            background-color: #673ab7; /* Medium Deep Purple */
             color: white;
             border: none;
             border-radius: 6px;
@@ -71,7 +73,7 @@
             transition: background-color 0.3s, transform 0.1s;
         }
         button:hover {
-            background-color: #0097a7; /* Darker shade on hover */
+            background-color: #512da8; /* Darker Purple shade on hover */
             transform: translateY(-1px);
         }
         #expenses-list {
@@ -80,39 +82,44 @@
         }
         /* Enhanced list item design */
         #expenses-list li {
-            background-color: #f5f5f5; /* Lighter grey for contrast */
+            background-color: #f9f9f9; /* Near-white grey for contrast */
             padding: 15px;
             margin-bottom: 10px;
             border-radius: 8px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-left: 5px solid #00bcd4; /* Accent color bar */
+            border-left: 5px solid #9575cd; /* Medium Purple Accent color bar */
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
         }
-        /* Style for the date and description container */
+        /* Style for the date, description, and category container */
         .expense-details {
             display: flex;
             flex-direction: column;
             gap: 4px;
+        }
+        .expense-category {
+            font-weight: bold;
+            font-size: 0.9em;
+            color: #673ab7; /* Medium Purple for category */
         }
         .expense-date {
             font-size: 0.85em;
             color: #6c757d; /* Grey color for date */
         }
         .expense-amount {
-            font-weight: 700; /* Bolder */
+            font-weight: 700;
             color: #4caf50; /* Standard Success Green */
             font-size: 1.1em;
         }
         .error-message {
-            color: #d32f2f; /* Dark Red */
+            color: #c62828; /* Dark Red */
             font-weight: bold;
             text-align: center;
             margin-top: 15px;
             padding: 10px;
-            background-color: #ffebee;
-            border: 1px solid #d32f2f;
+            background-color: #ffcdd2;
+            border: 1px solid #c62828;
             border-radius: 4px;
         }
     </style>
@@ -123,6 +130,17 @@
         
         <form id="expense-form">
             <h2>Add New Expense</h2>
+            
+            <select id="category" required>
+                <option value="" disabled selected>Select Category</option>
+                <option value="Food">Food 🍔</option>
+                <option value="Housing">Housing 🏠</option>
+                <option value="Transportation">Transportation 🚗</option>
+                <option value="Utilities">Utilities 💡</option>
+                <option value="Entertainment">Entertainment 🎬</option>
+                <option value="Other">Other 🛒</option>
+            </select>
+            
             <input type="date" id="date" required>
             <input type="text" id="description" placeholder="Description (e.g., Coffee, Rent)" required>
             <input type="number" id="amount" placeholder="Amount (e.g., 5.50)" step="0.01" required>
@@ -139,18 +157,19 @@
     <script>
         // --- MOCK DATA ARRAY ---
         let expenses = [
-            // Updated mock data with a date for each entry
-            { description: 'Groceries', amount: 45.75, date: '2025-12-01' },
-            { description: 'Dinner Out', amount: 62.00, date: '2025-11-28' },
-            { description: 'Monthly Rent', amount: 1200.00, date: '2025-12-03' }
+            // UPDATED mock data with category
+            { description: 'Groceries', amount: 45.75, date: '2025-12-01', category: 'Food' },
+            { description: 'Movie Tickets', amount: 62.00, date: '2025-11-28', category: 'Entertainment' },
+            { description: 'Monthly Rent', amount: 1200.00, date: '2025-12-03', category: 'Housing' }
         ];
 
         const expenseForm = document.getElementById('expense-form');
         const expensesList = document.getElementById('expenses-list');
         const errorMessage = document.getElementById('error-message');
         
-        // New: Get the date input element
         const dateInput = document.getElementById('date');
+        // NEW: Get the category input element
+        const categoryInput = document.getElementById('category');
 
         // Set default date to today for convenience
         dateInput.valueAsDate = new Date();
@@ -168,110 +187,11 @@
 
                 sortedExpenses.forEach(expense => {
                     const listItem = document.createElement('li');
-                    // Format amount to 2 decimal places
+                    
                     const formattedAmount = parseFloat(expense.amount).toFixed(2);
                     
-                    // Format date for display (e.g., YYYY-MM-DD to Dec 03, 2025)
                     const dateObj = new Date(expense.date);
                     const formattedDate = dateObj.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
 
+                    // UPDATED list item to include category
                     listItem.innerHTML = `
-                        <div class="expense-details">
-                            <span>${expense.description}</span>
-                            <span class="expense-date">${formattedDate}</span>
-                        </div>
-                        <span class="expense-amount">$${formattedAmount}</span>
-                    `;
-                    expensesList.appendChild(listItem);
-                });
-            } else {
-                expensesList.innerHTML = '<li>No expenses recorded yet.</li>';
-            }
-        }
-
-        /**
-         * Fetches all expenses (using mock data) and updates the list. (Simulated GET)
-         */
-        async function loadExpenses() {
-            try {
-                // SIMULATE API CALL SUCCESS with mock data
-                await new Promise(resolve => setTimeout(resolve, 300)); // Small delay for effect
-                
-                renderExpenses(expenses);
-                displayError(''); // Clear any previous error
-            } catch (error) {
-                console.error('Error loading expenses:', error);
-                renderExpenses([]); 
-                displayError('Failed to load expenses. Using mock data, so this shouldn\'t happen!');
-            }
-        }
-
-        /**
-         * Handles the form submission to add a new expense. (Simulated POST)
-         */
-        async function handleFormSubmit(e) {
-            e.preventDefault();
-
-            const descriptionInput = document.getElementById('description');
-            const amountInput = document.getElementById('amount');
-
-            // New: Get date value
-            const dateValue = dateInput.value;
-
-            const newExpense = {
-                date: dateValue, // Include the date
-                description: descriptionInput.value.trim(),
-                amount: parseFloat(amountInput.value)
-            };
-
-            if (newExpense.description === '' || isNaN(newExpense.amount) || newExpense.amount <= 0 || newExpense.date === '') {
-                displayError('Please enter a valid date, description, and a positive amount.');
-                return;
-            }
-
-            try {
-                // SIMULATE API POST CALL SUCCESS
-                await new Promise(resolve => setTimeout(resolve, 500)); // Simulate network latency
-
-                // Add the new expense to our local array
-                expenses.push(newExpense); 
-                
-                // Success! Clear the form and reload the list to show the new expense
-                descriptionInput.value = '';
-                amountInput.value = '';
-                dateInput.valueAsDate = new Date(); // Reset date to today
-                displayError(''); // Clear any previous error
-                await loadExpenses();
-                
-            } catch (error) {
-                console.error('Error submitting expense:', error);
-                displayError('A simulated network error occurred. Could not add expense.');
-            }
-        }
-
-        /**
-         * Displays or hides the error message area.
-         */
-        function displayError(message) {
-            if (message) {
-                errorMessage.textContent = message;
-                errorMessage.style.display = 'block';
-            } else {
-                errorMessage.textContent = '';
-                errorMessage.style.display = 'none';
-            }
-        }
-
-        // --- Event Listeners and Initialization ---
-
-        // 1. Attach the submit handler to the form
-        expenseForm.addEventListener('submit', handleFormSubmit);
-
-        // 2. Load and display expenses when the page is fully loaded
-        document.addEventListener('DOMContentLoaded', loadExpenses);
-
-    </script>
-</body>
-</html>
-
-
